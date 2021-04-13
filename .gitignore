@@ -132,7 +132,7 @@ dmypy.json
 .idea/
 
 # data_resource
-data/
+resources/data/
 
 # saved_model
-saved_model/
+resources/saved_model/
