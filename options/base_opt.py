@@ -1,0 +1,94 @@
+import argparse
+
+APP_DESCRIPTION = "-" * 20 + "My Py-DNN by Pytorch" + "-" * 20 + "\n"
+
+
+class BaseOpt():
+    def __init__(self):
+        self.parser = None
+        self.args = None
+        self.init_state = False
+        if not self.init_state:
+            self._init()
+            self.init_state = True
+        self.print_opt()
+
+    def _init(self):
+        parser = argparse.ArgumentParser(
+            description=APP_DESCRIPTION,
+            prog="run.py",
+            add_help=False,
+            formatter_class=argparse.RawDescriptionHelpFormatter
+        )
+        self.add_args(parser)
+        self.parser = parser
+        self.args = parser.parse_args()
+
+    def add_args(self, parser):
+        resource_parser = parser.add_argument_group("Resource Arguments")
+        model_parser = parser.add_argument_group("Model Arguments")
+        optimizer_parser = parser.add_argument_group("Optimizer Arguments")
+        other_parser = parser.add_argument_group("Other Arguments")
+        self.add_resource_args(resource_parser)
+        self.add_model_args(model_parser)
+        self.add_optimizer_args(optimizer_parser)
+        self.add_other_args(other_parser)
+
+    @staticmethod
+    def add_resource_args(parser):
+        parser.add_argument('--log', default="resources/log", help="path to the log folder to record information.")
+        parser.add_argument('--model_save', default="resources/saved_model", help="models are saved here.")
+
+    @staticmethod
+    def add_model_args(parser):
+        parser.add_argument('--work', type=str, default='train', choices=['train', 'test'],
+                            help="chooses model work type.")
+        parser.add_argument('--batch_size', type=int, default=8, help='input batch size.')
+        parser.add_argument('--epoch_num', type=int, default=50, help='epoch size.')
+
+    @staticmethod
+    def add_optimizer_args(parser):
+        parser.add_argument('--optimizer', type=str, default='Adam', choices=['Adam'],
+                            help="chooses which optimizer to use. ")
+        parser.add_argument('--learning_rate', type=float, default=0.001, help="initial learning rate.")
+        parser.add_argument('--beta1', type=float, default=0.5, help="possible parameters named by beta1.")
+        parser.add_argument('--beta2', type=float, default=0.999, help="possible parameters named by beta1.")
+        parser.add_argument('--lr_scheduler', type=str, choices=['StepLR'], help="chooses which lr_scheduler to use.")
+        parser.add_argument('--gamma', type=float, default=0.1, help="gamma parameter of lr_scheduler.")
+
+    @staticmethod
+    def add_other_args(parser):
+        parser.add_argument('--loss', type=str, default='NLLLoss', choices=['NLLLoss'],
+                            help="chooses which loss function to use.")
+        parser.add_argument('--thread_num', type=int, default=4, help="threads for loading data.")
+        parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU.')
+        parser.add_argument('--plot', action="store_true", help='if specified, plot the logs powerd by tensorboard.')
+        parser.add_argument('-h', '--help', action="store_true", help="show this help message and exit.")
+
+    def print_opt(self):
+        if self.args.help:
+            self.parser.print_help()
+            exit()
+        message = ""
+        message = message + "-" * 20 + "Options" + "-" * 20 + "\n"
+        arg_groups = self.parser._action_groups
+        for group in arg_groups:
+            args = group._group_actions
+            if len(args) != 0:
+                message = message + "-" * 5 + group.title + "-" * 5 + "\n"
+                for arg in args:
+                    arg_name = arg.dest
+                    arg_value = vars(self.args)[arg_name]
+                    default_value = self.parser.get_default(arg_name)
+                    remark = ""
+                    if arg_value != default_value:
+                        remark = '\t(default: {})\t'.format(default_value)
+                    message = message + "{}: {}{}\n".format(arg_name, arg_value, remark)
+        message = message + "-" * 20 + "End" + "-" * 20
+        print(self.parser.description)
+        print(message)
+
+
+if __name__ == '__main__':
+    opt = BaseOpt()
+    args = opt.args
