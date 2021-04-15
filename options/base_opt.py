@@ -1,9 +1,11 @@
 import argparse
 
-APP_DESCRIPTION = "-" * 20 + "My Py-DNN by Pytorch" + "-" * 20 + "\n"
+import torch.cuda
+
+from common import APP_DESCRIPTION, TRAIN, TEST, OPTIMIZERS, LOSS_FUNCTIONS
 
 
-class BaseOpt():
+class BaseOpt:
     def __init__(self):
         self.parser = None
         self.args = None
@@ -41,14 +43,14 @@ class BaseOpt():
 
     @staticmethod
     def add_model_args(parser):
-        parser.add_argument('--work', type=str, default='train', choices=['train', 'test'],
+        parser.add_argument('--work', type=str, default=TRAIN, choices=[TRAIN, TEST],
                             help="chooses model work type.")
         parser.add_argument('--batch_size', type=int, default=8, help='input batch size.')
         parser.add_argument('--epoch_num', type=int, default=50, help='epoch size.')
 
     @staticmethod
     def add_optimizer_args(parser):
-        parser.add_argument('--optimizer', type=str, default='Adam', choices=['Adam'],
+        parser.add_argument('--optimizer', type=str, default='Adam', choices=OPTIMIZERS,
                             help="chooses which optimizer to use. ")
         parser.add_argument('--learning_rate', type=float, default=0.001, help="initial learning rate.")
         parser.add_argument('--beta1', type=float, default=0.5, help="possible parameters named by beta1.")
@@ -58,11 +60,11 @@ class BaseOpt():
 
     @staticmethod
     def add_other_args(parser):
-        parser.add_argument('--loss', type=str, default='NLLLoss', choices=['NLLLoss'],
+        parser.add_argument('--loss', type=str, default='NLLLoss', choices=LOSS_FUNCTIONS,
                             help="chooses which loss function to use.")
         parser.add_argument('--thread_num', type=int, default=4, help="threads for loading data.")
         parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU.')
-        parser.add_argument('--plot', action="store_true", help='if specified, plot the logs powerd by tensorboard.')
+        parser.add_argument('--plot', action="store_true", help='if specified, plot the logs powered by tensorboard.')
         parser.add_argument('-h', '--help', action="store_true", help="show this help message and exit.")
 
     def print_opt(self):
@@ -73,10 +75,10 @@ class BaseOpt():
         message = message + "-" * 20 + "Options" + "-" * 20 + "\n"
         arg_groups = self.parser._action_groups
         for group in arg_groups:
-            args = group._group_actions
-            if len(args) != 0:
+            _args = group._group_actions
+            if len(_args) != 0:
                 message = message + "-" * 5 + group.title + "-" * 5 + "\n"
-                for arg in args:
+                for arg in _args:
                     arg_name = arg.dest
                     arg_value = vars(self.args)[arg_name]
                     default_value = self.parser.get_default(arg_name)
@@ -87,6 +89,17 @@ class BaseOpt():
         message = message + "-" * 20 + "End" + "-" * 20
         print(self.parser.description)
         print(message)
+
+    def set_gpu(self):
+        cuda = torch.cuda.is_available()
+        gpu_ids = self.args.gpu_ids.split(',')
+        gpu_ids = [ int(gpu_id) for gpu_id in gpu_ids]
+        if len(gpu_ids) == 1:
+            gpu_id = gpu_ids[0]
+            if gpu_id != -1:
+                if cuda:
+                    torch.cuda.set_device(gpu_id)
+        return gpu_ids
 
 
 if __name__ == '__main__':
