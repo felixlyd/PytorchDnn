@@ -33,6 +33,15 @@ valid_transforms = transforms.Compose(
 )
 
 
+def this_to_image(tensor):
+    tensor = tensor.to("cpu").clone().detach()
+    image = tensor.numpy().squeeze()
+    image = image.transpose(1, 2, 0)
+    image = image * np.array((0.229, 0.224, 0.225)) + np.array((0.485, 0.456, 0.406))
+    image = image.clip(0, 1)
+    return image
+
+
 class ImageLoader():
     def __init__(self, opt):
         self.data_dir = opt.data
@@ -70,10 +79,3 @@ class ImageLoader():
         self.test_sets = datasets.ImageFolder(test_data_dir, train_transforms)
         self.test_loaded = DataLoader(self.test_sets, batch_size=self.batch_size, shuffle=True)
 
-    def this_to_image(self, tensor):
-        tensor = tensor.to("cpu").clone().detach()
-        image = tensor.numpy().squeeze()
-        image = image.transpose(1, 2, 0)
-        image = image * np.array((0.229, 0.224, 0.225)) + np.array((0.485, 0.456, 0.406))
-        image = image.clip(0, 1)
-        return image
