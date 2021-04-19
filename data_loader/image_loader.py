@@ -1,6 +1,7 @@
 import os
 
 import numpy as np
+import torch
 from torchvision import transforms, datasets
 from torch.utils.data import DataLoader
 from common import TRAIN, VALID, TEST
@@ -44,19 +45,19 @@ def this_to_image(tensor):
 
 class ImageLoader():
     def __init__(self, opt):
+        self.test_loaded = None
+        self.test_sets = None
         self.data_dir = opt.data
         self.batch_size = opt.batch_size
-        self.work = opt.work
         self.train_sets = None
         self.train_loaded = None
         self.class_nums = 0
         self.valid_sets = None
         self.valid_loaded = None
-        if self.work == TRAIN:
-            self._load_train_valid()
-        elif self.work == TEST:
-            self.test_sets = None
-            self.test_loaded = None
+        self.gpu_ids = opt.gpu_ids
+        self.device = None
+        self._set_device()
+        self.inputs = {}
 
     def _load_train_valid(self):
         train_data_dir = os.path.join(self.data_dir, TRAIN)
@@ -79,3 +80,19 @@ class ImageLoader():
         self.test_sets = datasets.ImageFolder(test_data_dir, train_transforms)
         self.test_loaded = DataLoader(self.test_sets, batch_size=self.batch_size, shuffle=True)
 
+    def init_(self, is_train):
+        if is_train:
+            self._load_train_valid()
+            self.inputs[TRAIN] = self.train_loaded.to(self.device)
+            self.inputs[VALID] = self.valid_loaded.to(self.device)
+        else:
+            self._load_test()
+            self.inputs[TEST] = self.test_loaded.to(self.device)
+
+    def _set_device(self):
+        cuda = torch.cuda.is_available()
+        if self.gpu_ids[0] != -1:
+            if cuda:
+                self.device = torch.device('cuda:{}'.format(self.gpu_ids[0]))
+            else:
+                self.device = torch.device('cpu')
