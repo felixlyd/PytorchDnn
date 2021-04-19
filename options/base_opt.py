@@ -1,7 +1,5 @@
 import argparse
 
-import torch.cuda
-
 from common import APP_DESCRIPTION, TRAIN, TEST, OPTIMIZERS, LOSS_FUNCTIONS
 
 
@@ -13,12 +11,12 @@ class BaseOpt:
         if not self.init_state:
             self._init()
             self.init_state = True
+        self.args.gpu_ids = self._set_gpu()
         self.print_opt()
 
     def _init(self):
         parser = argparse.ArgumentParser(
             description=APP_DESCRIPTION,
-            prog="run.py",
             add_help=False,
             formatter_class=argparse.RawDescriptionHelpFormatter
         )
@@ -53,7 +51,7 @@ class BaseOpt:
         parser.add_argument('--optimizer', type=str, default='Adam', choices=OPTIMIZERS,
                             help="chooses which optimizer to use. ")
         parser.add_argument('--learning_rate', type=float, default=0.001, help="initial learning rate.")
-        parser.add_argument('--beta1', type=float, default=0.5, help="possible parameters named by beta1.")
+        parser.add_argument('--beta1', type=float, default=0.9, help="possible parameters named by beta1.")
         parser.add_argument('--beta2', type=float, default=0.999, help="possible parameters named by beta1.")
         parser.add_argument('--lr_scheduler', type=str, choices=['StepLR'], help="chooses which lr_scheduler to use.")
         parser.add_argument('--gamma', type=float, default=0.1, help="gamma parameter of lr_scheduler.")
@@ -90,15 +88,9 @@ class BaseOpt:
         print(self.parser.description)
         print(message)
 
-    def set_gpu(self):
-        cuda = torch.cuda.is_available()
+    def _set_gpu(self):
         gpu_ids = self.args.gpu_ids.split(',')
         gpu_ids = [ int(gpu_id) for gpu_id in gpu_ids]
-        if len(gpu_ids) == 1:
-            gpu_id = gpu_ids[0]
-            if gpu_id != -1:
-                if cuda:
-                    torch.cuda.set_device(gpu_id)
         return gpu_ids
 
 
