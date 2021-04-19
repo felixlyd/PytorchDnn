@@ -1,7 +1,6 @@
+import torch
 from torchvision import models
 import torch.nn as nn
-
-from common import TRAIN
 
 
 class PreCNNModel:
@@ -10,34 +9,33 @@ class PreCNNModel:
         self.model_name = opt.model
         self.work_goal = 1
         self.input_size = 0
-        self.is_train = (opt.work == TRAIN)
-        self.gpu_ids = opt.set_gpu()
+        self.gpu_ids = opt.gpu_ids
         self.model_save = opt.model_save
-        self.optimizers = None
-        self.loss = None
-        self.input_data = None
+        self.device = None
         self.epochs = opt.epoch_num
+        self.is_train = False
 
     # Transfer Learning
-    def set_params_requires_grad(self, use_pre=True):
+    def _set_params_requires_grad(self, use_pre=True):
         if use_pre:
             for param in self.model.parameters():
                 param.requires_grad = False
 
     def set_work_goal(self, goals):
         self.work_goal = goals
+        self.is_train = True
 
-    def set_model(self, use_pre=True):
+    def _set_model(self, use_pre=True):
         # todo
         if self.model_name == "VGG":
             self.model = models.vgg16(pretrained=use_pre)
-            self.set_params_requires_grad(use_pre=use_pre)
+            self._set_params_requires_grad(use_pre=use_pre)
             feature_nums = self.model.classifier[6].in_features
             self.model.classifier[6] = nn.Linear(feature_nums, self.work_goal)
             self.input_size = 224
         elif self.model_name == "ResNet":
             self.model = models.resnet152(pretrained=use_pre)
-            self.set_params_requires_grad(use_pre=use_pre)
+            self._set_params_requires_grad(use_pre=use_pre)
             feature_nums = self.model.fc.in_features
             self.model.fc = nn.Sequential(
                 nn.Linear(feature_nums, self.work_goal),
@@ -45,7 +43,24 @@ class PreCNNModel:
             )
             self.input_size = 224
 
-    def set_input(self, input):
+    def _set_device(self):
+        cuda = torch.cuda.is_available()
+        if len(self.gpu_ids) == 1:
+            gpu_id = self.gpu_ids[0]
+            if gpu_id != -1:
+                if cuda:
+                    print("using GPU {}.".format(self.gpu_ids[0]))
+                    self.device = torch.device('cuda:{}'.format(self.gpu_ids[0]))
+                else:
+                    print("using CPU.")
+                    self.device = torch.device('cpu')
+                self.model = self.model.to(self.device)
+        else:
+            print("using parallel GPUs." + ",".join(self.gpu_ids))
+            self.model = nn.DataParallel(self.model, self.gpu_ids, self.gpu_ids[0])
 
-
-
+    def init_(self):
+        # todo
+        if self.is_train:
+            self._set_model()
+            self._set_device()
