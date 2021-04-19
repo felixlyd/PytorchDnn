@@ -2,7 +2,7 @@ import torch.optim as optim
 
 
 class Optimizer:
-    def __init__(self, opt):
+    def __init__(self, opt, params):
         self._optimizer = None
         self._optimizer_name = opt.optimizer
         self._lr = opt.learning_rate
@@ -11,6 +11,9 @@ class Optimizer:
         self.beta1 = opt.beta1
         self.beta2 = opt.beta2
         self.gamma = opt.gamma
+
+        self._init_optimizer(params)
+        self._init_lr_scheduler()
 
     def _init_optimizer(self, params):
         # todo
@@ -23,3 +26,13 @@ class Optimizer:
             self._lr_scheduler = None
         elif self._lr_scheduler_name == "StepLR":
             self._lr_scheduler = optim.lr_scheduler.StepLR(self._optimizer, step_size=7, gamma=self.gamma)
+
+    def prepare(self):
+        self._optimizer.zero_grad()
+
+    def update_(self):
+        self._optimizer.step()
+
+    def lr_decay(self):
+        if self._lr_scheduler is not None:
+            self._lr_scheduler.step()
