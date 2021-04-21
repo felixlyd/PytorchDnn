@@ -4,7 +4,8 @@ from common import APP_DESCRIPTION, TRAIN, TEST, OPTIMIZERS, LOSS_FUNCTIONS
 
 
 class BaseOpt:
-    def __init__(self):
+    def __init__(self, model_type):
+        self.model_type = model_type
         self.parser = None
         self.args = None
         self.init_state = False
@@ -17,12 +18,16 @@ class BaseOpt:
     def _init(self):
         parser = argparse.ArgumentParser(
             description=APP_DESCRIPTION,
+            prog='run.py ' + self.model_type,
             add_help=False,
-            formatter_class=argparse.RawDescriptionHelpFormatter
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter
         )
         self.add_args(parser)
         self.parser = parser
         self.args = parser.parse_args()
+        if self.args.help:
+            self.parser.print_help()
+            exit(0)
 
     def add_args(self, parser):
         resource_parser = parser.add_argument_group("Resource Arguments")
@@ -37,14 +42,14 @@ class BaseOpt:
     @staticmethod
     def add_resource_args(parser):
         parser.add_argument('--log', default="resources/log", help="path to the log folder to record information.")
-        parser.add_argument('--model_save', default="resources/saved_model", help="models are saved here.")
+        parser.add_argument('--model_save', default="resources/saved_model/model.pth", help="models are saved here.")
 
     @staticmethod
     def add_model_args(parser):
         parser.add_argument('--work', type=str, default=TRAIN, choices=[TRAIN, TEST],
                             help="chooses model work type.")
-        parser.add_argument('--batch_size', type=int, default=8, help='input batch size.')
-        parser.add_argument('--epoch_num', type=int, default=50, help='epoch size.')
+        parser.add_argument('--batch_size', type=int, default=32, help='input batch size.')
+        parser.add_argument('--epoch_num', type=int, default=15, help='epoch size.')
 
     @staticmethod
     def add_optimizer_args(parser):
@@ -63,7 +68,7 @@ class BaseOpt:
         parser.add_argument('--thread_num', type=int, default=4, help="threads for loading data.")
         parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU.')
         parser.add_argument('--plot', action="store_true", help='if specified, plot the logs powered by tensorboard.')
-        parser.add_argument('-h', '--help', action="store_true", help="show this help message and exit.")
+        parser.add_argument('--help', action="store_true", help="show this help message and exit.")
 
     def print_opt(self):
         if self.args.help:
@@ -93,7 +98,3 @@ class BaseOpt:
         gpu_ids = [ int(gpu_id) for gpu_id in gpu_ids]
         return gpu_ids
 
-
-if __name__ == '__main__':
-    opt = BaseOpt()
-    args = opt.args
