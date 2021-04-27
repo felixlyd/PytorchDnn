@@ -30,7 +30,7 @@ Deep Neural Networks Models powered by Pytorch
 │   ├── data_opt.py
 │   └── image_loader.py
 ├── evaluate
-│   └── evaluate.py
+│   └── image_classify_eval.py
 ├── model
 │   ├── image_classify_model.py
 │   └── models_opt.py
@@ -51,15 +51,10 @@ Deep Neural Networks Models powered by Pytorch
 ```
 
 ### Usages
-```shell
-python run.py [TYPE] --help
-```
-| TYPE | "image" | ImageClassifier |
-|------|---------|-----------------|
 
 **for example**
 ```shell
-$ python run.py image [--data DATA] [--log LOG] [--model_save MODEL_SAVE]
+$ python image_classify_run.py [--data DATA] [--log LOG] [--model_save MODEL_SAVE]
                     [--model {VGG,ResNet,DenseNet,ResNext}]
                     [--work {train,test}] [--batch_size BATCH_SIZE]
                     [--epoch_num EPOCH_NUM] [--optimizer {Adam}]
@@ -96,7 +91,7 @@ TensorBoard 2.4.1 at http://localhost:6006/ (Press CTRL+C to quit)
 **for example**
 
 ```shell
-$ python run.py image --data resources/data/flowers
+$ python image_classify_run.py --data resources/data/flowers
 --------------------My Py-DNN by Pytorch--------------------
 --------------------Options--------------------
 -----Resource Arguments-----
