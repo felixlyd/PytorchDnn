@@ -7,13 +7,14 @@ class PreCNNModel:
     def __init__(self, opt):
         self.model = None
         self.model_name = opt.model
-        self.work_goal = 1
+        self.work_goal = 0
         self.input_size = 0
+        self._set_input_size()
         self.gpu_ids = opt.gpu_ids
         self.model_save = opt.model_save
         self.device = None
         self.epochs = opt.epoch_num
-        self.is_train = False
+        self.is_train = (opt.test is False)
 
     # Transfer Learning
     def _set_params_requires_grad(self, use_pre=True):
@@ -21,18 +22,11 @@ class PreCNNModel:
             for param in self.model.parameters():
                 param.requires_grad = False
 
-    def set_work_goal(self, goals):
-        self.work_goal = goals
-        self.is_train = True
-
     def _set_model(self, use_pre=True):
-        # todo
         if self.model_name == "VGG":
             self.model = models.vgg16(pretrained=use_pre)
-            self._set_params_requires_grad(use_pre=use_pre)
             feature_nums = self.model.classifier[6].in_features
             self.model.classifier[6] = nn.Linear(feature_nums, self.work_goal)
-            self.input_size = 224
         elif self.model_name == "ResNet":
             self.model = models.resnet152(pretrained=use_pre)
             self._set_params_requires_grad(use_pre=use_pre)
@@ -41,7 +35,19 @@ class PreCNNModel:
                 nn.Linear(feature_nums, self.work_goal),
                 nn.LogSoftmax(dim=1),
             )
-            self.input_size = 224
+        elif self.model_name == "DenseNet":
+            self.model = models.densenet169(pretrained=use_pre)
+            self._set_params_requires_grad(use_pre=use_pre)
+            feature_nums = self.model.classifier.in_features
+            self.model.classifier = nn.Linear(feature_nums, self.work_goal)
+        elif self.model_name == "ResNext":
+            self.model = models.resnext50_32x4d(pretrained=use_pre)
+            self._set_params_requires_grad(use_pre=use_pre)
+            feature_nums = self.model.fc.in_features
+            self.model.fc = nn.Sequential(
+                nn.Linear(feature_nums, self.work_goal),
+                nn.LogSoftmax(dim=1),
+            )
 
     def _set_device(self):
         cuda = torch.cuda.is_available()
@@ -59,8 +65,21 @@ class PreCNNModel:
             print("using parallel GPUs." + ",".join(self.gpu_ids))
             self.model = nn.DataParallel(self.model, self.gpu_ids, self.gpu_ids[0])
 
-    def init_(self):
-        # todo
+    def _set_input_size(self):
+        if self.model_name == "VGG":
+            self.input_size = 224
+        elif self.model_name == "ResNet":
+            self.input_size = 224
+        elif self.model_name == "DenseNet":
+            self.input_size = 224
+        elif self.model_name == "ResNext":
+            self.input_size = 224
+
+    def init_(self, work_goal=0):
         if self.is_train:
+            self.work_goal = work_goal
             self._set_model()
+            self._set_device()
+        else:
+            self.model = torch.load(self.model_save)
             self._set_device()

@@ -4,8 +4,7 @@ from common import APP_DESCRIPTION, TRAIN, TEST, OPTIMIZERS, LOSS_FUNCTIONS
 
 
 class BaseOpt:
-    def __init__(self, model_type):
-        self.model_type = model_type
+    def __init__(self):
         self.parser = None
         self.args = None
         self.init_state = False
@@ -18,7 +17,6 @@ class BaseOpt:
     def _init(self):
         parser = argparse.ArgumentParser(
             description=APP_DESCRIPTION,
-            prog='run.py ' + self.model_type,
             add_help=False,
             formatter_class=argparse.ArgumentDefaultsHelpFormatter
         )
@@ -46,8 +44,7 @@ class BaseOpt:
 
     @staticmethod
     def add_model_args(parser):
-        parser.add_argument('--work', type=str, default=TRAIN, choices=[TRAIN, TEST],
-                            help="chooses model work type.")
+        parser.add_argument('--test', action="store_true", help="chooses model work type to test.")
         parser.add_argument('--batch_size', type=int, default=32, help='input batch size.')
         parser.add_argument('--epoch_num', type=int, default=15, help='epoch size.')
 

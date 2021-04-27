@@ -3,8 +3,8 @@ from common import CNN_MODELS
 
 
 class ImageClassifyOpt(BaseOpt):
-    def __init__(self, model_type):
-        super(ImageClassifyOpt, self).__init__(model_type)
+    def __init__(self):
+        super(ImageClassifyOpt, self).__init__()
 
     @staticmethod
     def add_model_args(parser):
@@ -14,9 +14,10 @@ class ImageClassifyOpt(BaseOpt):
 
     @staticmethod
     def add_resource_args(parser):
-        parser.add_argument('--data',
+        parser.add_argument('--data', default='resources/data',
                             help="for train, the path should have sub-folders train and valid;for test,"
                                  " should have sub-folders test. reference docs: "
                                  "\n https://pytorch.org/vision/stable/datasets.html#imagefolder")
+        parser.add_argument('--out', help="out folders for test")
         BaseOpt.add_resource_args(parser)
 

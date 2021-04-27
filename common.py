@@ -1,3 +1,6 @@
+import time
+from datetime import timedelta
+
 APP_DESCRIPTION = "-" * 20 + "My Py-DNN by Pytorch" + "-" * 20 + "\n"
 
 IMG_EXTENSIONS = [
@@ -24,3 +27,8 @@ OPTIMIZERS = [
 LOSS_FUNCTIONS = [
     'NLLLoss',
 ]
+
+def get_time_dif(start_time):
+    end_time = time.time()
+    time_dif = end_time - start_time
+    return timedelta(seconds=int(round(time_dif)))

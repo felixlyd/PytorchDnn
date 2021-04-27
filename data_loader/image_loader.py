@@ -12,30 +12,33 @@ from common import TRAIN, VALID, TEST
 官方文档：https://pytorch.org/vision/stable/datasets.html
 '''
 
-train_transforms = transforms.Compose(
-    [
-        transforms.RandomRotation(45),  # -45到45度间随机选角度旋转
-        transforms.CenterCrop(224),  # 从中心开始裁剪到224*224
-        transforms.RandomHorizontalFlip(p=0.5),  # 随机水平翻转
-        transforms.RandomVerticalFlip(p=0.5),  # 随机垂直翻转
-        transforms.ColorJitter(brightness=0.2, contrast=0.1, saturation=0.1, hue=0.1),  # 亮度，对比度，饱和度，色相
-        transforms.RandomGrayscale(p=0.025),  # 概率转换为灰度图
-        transforms.ToTensor(),  # 转换成张量Tensor格式
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),  # 标准化
-    ]
-)
 
-valid_transforms = transforms.Compose(
-    [
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])  # 测试集输入规格保持一致
-    ]
-)
+def get_transforms(is_train, input_size=224):
+    if is_train:
+        return transforms.Compose(
+            [
+                transforms.RandomRotation(45),  # -45到45度间随机选角度旋转
+                transforms.CenterCrop(input_size),  # 从中心开始裁剪到224*224
+                transforms.RandomHorizontalFlip(p=0.5),  # 随机水平翻转
+                transforms.RandomVerticalFlip(p=0.5),  # 随机垂直翻转
+                transforms.ColorJitter(brightness=0.2, contrast=0.1, saturation=0.1, hue=0.1),  # 亮度，对比度，饱和度，色相
+                transforms.RandomGrayscale(p=0.025),  # 概率转换为灰度图
+                transforms.ToTensor(),  # 转换成张量Tensor格式
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),  # 标准化
+            ]
+        )
+    else:
+        return transforms.Compose(
+            [
+                transforms.Resize(256),
+                transforms.CenterCrop(input_size),
+                transforms.ToTensor(),
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])  # 测试集输入规格保持一致
+            ]
+        )
 
 
-def this_to_image(tensor):
+def this2image(tensor):
     tensor = tensor.to("cpu").clone().detach()
     image = tensor.numpy().squeeze()
     image = image.transpose(1, 2, 0)
@@ -56,16 +59,22 @@ class ImageLoader():
         self.gpu_ids = opt.gpu_ids
         self.device = self._set_device()
         self.inputs = {}
+        self.is_train = (opt.test is False)
 
-    def _load_train_valid(self):
+    def _load_train_valid(self, input_size=224):
+        if not os.path.exists(self.data_dir):
+            print("Missing data folders")
+            exit(-1)
         train_data_dir = os.path.join(self.data_dir, TRAIN)
         valid_data_dir = os.path.join(self.data_dir, VALID)
         if not os.path.exists(train_data_dir) or not os.path.exists(valid_data_dir):
             print("Missing {} and {} folders".format(TRAIN, VALID))
             exit(-1)
+        train_transforms = get_transforms(True, input_size)
         train_sets = datasets.ImageFolder(train_data_dir, train_transforms)
         self.train_loaded = DataLoader(train_sets, batch_size=self.batch_size, shuffle=True,
                                        num_workers=self.thread)
+        valid_transforms = get_transforms(False, input_size)
         valid_sets = datasets.ImageFolder(valid_data_dir, valid_transforms)
         self.valid_loaded = DataLoader(valid_sets, batch_size=self.batch_size, shuffle=True,
                                        num_workers=self.thread)
@@ -75,24 +84,26 @@ class ImageLoader():
         print("Batch size:", self.batch_size)
         print("Class nums:", self.class_nums)
 
-    def _load_test(self):
-        # todo
+    def _load_test(self, input_size=224):
+        if not os.path.exists(self.data_dir):
+            print("Missing data folders")
+            exit(-1)
         test_data_dir = os.path.join(self.data_dir, TEST)
         if not os.path.exists(test_data_dir):
             print("Missing {} folders".format(TEST))
             exit(-1)
-        test_sets = datasets.ImageFolder(test_data_dir, train_transforms)
+        test_sets = datasets.ImageFolder(test_data_dir, get_transforms(False, input_size))
         self.test_loaded = DataLoader(test_sets, batch_size=self.batch_size, shuffle=True,
                                       num_workers=self.thread)
 
-    def init_(self, is_train):
-        if is_train:
-            self._load_train_valid()
-            self.inputs[TRAIN] = [(x.to(self.device), y.to(self.device)) for x, y in tqdm(self.train_loaded)]
-            self.inputs[VALID] = [(x.to(self.device), y.to(self.device)) for x, y in tqdm(self.valid_loaded)]
+    def init_(self, input_size=224):
+        if self.is_train:
+            self._load_train_valid(input_size)
+            self.inputs[TRAIN] = [(x, y) for x, y in tqdm(self.train_loaded)]
+            self.inputs[VALID] = [(x, y) for x, y in tqdm(self.valid_loaded)]
         else:
-            self._load_test()
-            self.inputs[TEST] = [(x.to(self.device), y.to(self.device)) for x, y in tqdm(self.test_loaded)]
+            self._load_test(input_size)
+            self.inputs[TEST] = [(x, y) for x, y in tqdm(self.test_loaded)]
 
     def _set_device(self):
         device = "cpu"

@@ -3,8 +3,8 @@ import torch.nn as nn
 
 class LossFunc:
     def __init__(self, opt):
-        self.loss_func_name = opt.loss
-        loss_func = getattr(nn, self.loss_func_name)
+        self.func_name = opt.loss
+        loss_func = getattr(nn, self.func_name)
         self.loss_func = loss_func()
         self.loss = None
 
