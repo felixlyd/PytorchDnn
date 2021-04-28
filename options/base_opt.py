@@ -1,6 +1,6 @@
 import argparse
 
-from common import APP_DESCRIPTION, TRAIN, TEST, OPTIMIZERS, LOSS_FUNCTIONS
+from common import APP_DESCRIPTION, TRAIN, TEST, OPTIMIZERS, LOSS_FUNCTIONS, LR_SCHEDULERS
 
 
 class BaseOpt:
@@ -55,7 +55,7 @@ class BaseOpt:
         parser.add_argument('--learning_rate', type=float, default=0.001, help="initial learning rate.")
         parser.add_argument('--beta1', type=float, default=0.9, help="possible parameters named by beta1.")
         parser.add_argument('--beta2', type=float, default=0.999, help="possible parameters named by beta1.")
-        parser.add_argument('--lr_scheduler', type=str, choices=['StepLR'], help="chooses which lr_scheduler to use.")
+        parser.add_argument('--lr_scheduler', type=str, choices=LR_SCHEDULERS, help="chooses which lr_scheduler to use.")
         parser.add_argument('--gamma', type=float, default=0.1, help="gamma parameter of lr_scheduler.")
 
     @staticmethod

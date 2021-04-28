@@ -28,6 +28,13 @@ LOSS_FUNCTIONS = [
     'NLLLoss',
 ]
 
+LR_SCHEDULERS = [
+    'StepLR',
+    # 'MultiStepLR',
+    'ExponentialLR',
+    'CosineAnnealingLR',
+]
+
 def get_time_dif(start_time):
     end_time = time.time()
     time_dif = end_time - start_time
