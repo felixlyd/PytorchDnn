@@ -14,6 +14,7 @@ class PreCNNModel:
         self.model_save = opt.model_save
         self.device = None
         self.epochs = opt.epoch_num
+        self.total_iter = 0
         self.is_train = (opt.test is False)
 
     # Transfer Learning

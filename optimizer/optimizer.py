@@ -32,7 +32,7 @@ class Optimizer:
         elif self._lr_scheduler_name == "CosineAnnealingLR":
             self._lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(self._optimizer, T_max=10)
 
-    def prepare(self):
+    def zero_(self):
         self._optimizer.zero_grad()
 
     def update_(self):

@@ -1,6 +1,6 @@
 import time
 
-from common import TRAIN, TEST, VALID, get_time_dif
+from common import TRAIN, TEST, VALID, get_time_dif, set_seed
 from criterion.criterion import LossFunc
 from data_loader.image_loader import ImageLoader
 from evaluate.image_classify_eval import get_valid_acc_loss, get_train_acc, get_test_acc_loss
@@ -13,42 +13,35 @@ from plot.plot_writer import PlotImageClassifier
 
 def transfer_train(opt_, data_, model_, optimizer_, criterion_, saved_, plot_):
     model_.model.train()
-    total_iter = 0
-    stop = False
     for epoch in range(opt_.epoch_num):
-        print('Epoch [{}/{}]'.format(epoch + 1, opt.epoch_num))
+        print('Epoch [{}/{}]'.format(epoch + 1, opt_.epoch_num))
         for i, (inputs, labels) in enumerate(data_.inputs[TRAIN]):
-            optimizer_.prepare()
+            optimizer_.zero_()
             inputs = inputs.to(data.device)
             labels = labels.to(data.device)
             outputs = model_.model(inputs)
             train_loss = criterion_.compute_(outputs, labels)
             criterion_.backward()
             optimizer_.update_()
-            if total_iter % 100 == 0:
+            if model_.total_iter % 100 == 0:
                 train_acc = get_train_acc(outputs, labels)
-                valid_acc, valid_loss = get_valid_acc_loss(model.model, data.inputs[VALID], criterion, data.device)
+                valid_acc, valid_loss = get_valid_acc_loss(model_.model, data_.inputs[VALID], criterion_, data_.device)
                 model_.model.train()
-                saved_.save_model_state(valid_loss, model.model, total_iter)
-                plot_.write_loss_acc(train_loss.item(), valid_loss, train_acc, valid_acc, total_iter)
-                plot_.print_msg(train_loss.item(), valid_loss, train_acc, valid_acc, total_iter,
+                saved_.save_model_state(valid_loss, model_.model, model_.total_iter)
+                plot_.write_loss_acc(train_loss.item(), valid_loss, train_acc, valid_acc, model_.total_iter)
+                plot_.print_msg(train_loss.item(), valid_loss, train_acc, valid_acc, model_.total_iter,
                                 get_time_dif(start_time))
-                plot_.write_lr(optimizer.get_iter_lr(), total_iter)
-            total_iter = total_iter + 1
-            stop = saved.is_shut_down(total_iter)
-            if stop:
-                break
+                plot_.write_lr(optimizer_.get_iter_lr(), model_.total_iter)
+            model_.total_iter = model_.total_iter + 1
+            if saved_.is_shut_down(model_.total_iter):
+                return
         optimizer_.lr_decay()
-        if stop:
-            break
-    plot_.write_done()
-    saved_.save_model(model.model)
-
 
 if __name__ == '__main__':
     opt = ImageClassifyOpt()
     opt = opt.args
     is_train = (opt.test is False)
+    set_seed(opt.seed) # 保证能复现结果
 
     model = PreCNNModel(opt)
     print("Loading data...")
@@ -86,3 +79,6 @@ if __name__ == '__main__':
             start_time = time.time()
             transfer_train(opt, data, model, optimizer, criterion, saved, plot)
             print("Time usage:", get_time_dif(start_time))
+        plot.write_done()
+        saved.save_model(model.model)
+

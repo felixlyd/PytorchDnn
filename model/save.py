@@ -19,6 +19,7 @@ class ModelSave:
         max_iter = 2000
         if iter_ - self.last_better_iter > max_iter:
             print("No optimization for a long time({} iters), auto-stopping...".format(max_iter))
+            self.last_better_iter = iter_ # for second training
             return True
         else:
             return False

@@ -1,5 +1,9 @@
+import random
 import time
 from datetime import timedelta
+
+import numpy as np
+import torch
 
 APP_DESCRIPTION = "-" * 20 + "My Py-DNN by Pytorch" + "-" * 20 + "\n"
 
@@ -34,6 +38,18 @@ LR_SCHEDULERS = [
     'ExponentialLR',
     'CosineAnnealingLR',
 ]
+
+
+def set_seed(seed):
+    if seed is None:
+        seed = 24
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+
 
 def get_time_dif(start_time):
     end_time = time.time()
