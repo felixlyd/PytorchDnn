@@ -3,7 +3,7 @@ import time
 from common import TRAIN, TEST, VALID, get_time_dif
 from criterion.criterion import LossFunc
 from data_loader.image_loader import ImageLoader
-from evaluate.image_classify_eval import get_valid_acc_loss, get_train_acc
+from evaluate.image_classify_eval import get_valid_acc_loss, get_train_acc, get_test_acc_loss
 from model.image_classify_model import PreCNNModel
 from model.save import ModelSave
 from optimizer.optimizer import Optimizer
@@ -26,8 +26,7 @@ if __name__ == '__main__':
     criterion = LossFunc(opt)
     if not is_train:
         print("Testing data...")
-        test_acc, test_loss = get_valid_acc_loss(model.model, data.inputs[TEST], criterion, data.device, test=True,
-                                                 out_path=opt.out)
+        test_acc, test_loss = get_test_acc_loss(model.model, data.inputs[TEST], criterion, data.device, out_path=opt.out)
         msg = 'Test Loss: {0:>5.2},  Test Acc: {1:>6.2%}'
         print(msg.format(test_loss, test_acc))
         print("Time usage:", get_time_dif(start_time))

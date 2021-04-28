@@ -27,27 +27,26 @@ Deep Neural Networks Models powered by Pytorch
 ├── criterion
 │   └── criterion.py
 ├── data_loader
-│   ├── data_opt.py
 │   └── image_loader.py
 ├── evaluate
 │   └── image_classify_eval.py
+├── image_classify_run.py
 ├── model
 │   ├── image_classify_model.py
-│   └── models_opt.py
+│   └── save.py
 ├── optimizer
 │   └── optimizer.py
 ├── options
 │   ├── base_opt.py
-│   ├── image_classify_opt.py
-│   └── options_opt.py
+│   └── image_classify_opt.py
 ├── plot
 │   └── plot_writer.py
-├── resources
-│   ├── data
-│   ├── log
-│   ├── result
-│   └── saved_model
-└── run.py
+└── resources
+    ├── data
+    ├── images
+    ├── log
+    ├── results
+    └── saved_model
 ```
 
 ### Usages

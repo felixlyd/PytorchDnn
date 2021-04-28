@@ -25,8 +25,12 @@ class PreCNNModel:
     def _set_model(self, use_pre=True):
         if self.model_name == "VGG":
             self.model = models.vgg16(pretrained=use_pre)
+            self._set_params_requires_grad(use_pre=use_pre)
             feature_nums = self.model.classifier[6].in_features
-            self.model.classifier[6] = nn.Linear(feature_nums, self.work_goal)
+            self.model.classifier[6] = nn.Sequential(
+                nn.Linear(feature_nums, self.work_goal),
+                nn.LogSoftmax(dim=1),
+            )
         elif self.model_name == "ResNet":
             self.model = models.resnet152(pretrained=use_pre)
             self._set_params_requires_grad(use_pre=use_pre)
@@ -39,7 +43,10 @@ class PreCNNModel:
             self.model = models.densenet169(pretrained=use_pre)
             self._set_params_requires_grad(use_pre=use_pre)
             feature_nums = self.model.classifier.in_features
-            self.model.classifier = nn.Linear(feature_nums, self.work_goal)
+            self.model.classifier = nn.Sequential(
+                nn.Linear(feature_nums, self.work_goal),
+                nn.LogSoftmax(dim=1),
+            )
         elif self.model_name == "ResNext":
             self.model = models.resnext50_32x4d(pretrained=use_pre)
             self._set_params_requires_grad(use_pre=use_pre)

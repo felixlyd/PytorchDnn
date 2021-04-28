@@ -12,12 +12,13 @@ class ModelSave:
         if loss_ < self.valid_best_loss:
             self.valid_best_loss = loss_
             self.state_dict  = model_.state_dict()
+            torch.save(self.state_dict, self.path + ".state_dict")
             self.last_better_iter = iter_
 
     def is_shut_down(self, iter_):
         max_iter = 2000
         if iter_ - self.last_better_iter > max_iter:
-            print("No optimization for a long time({} batches), auto-stopping...".format(max_iter))
+            print("No optimization for a long time({} iters), auto-stopping...".format(max_iter))
             return True
         else:
             return False
@@ -25,4 +26,3 @@ class ModelSave:
     def save_model(self, model_):
         model_.load_state_dict(self.state_dict)
         torch.save(model_, self.path)
-        torch.save(self.state_dict,self.path+".state_dict")
