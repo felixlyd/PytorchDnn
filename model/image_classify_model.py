@@ -21,6 +21,9 @@ class PreCNNModel:
         if use_pre:
             for param in self.model.parameters():
                 param.requires_grad = False
+        else:
+            for param in self.model.parameters():
+                param.requires_grad = True
 
     def _set_model(self, use_pre=True):
         if self.model_name == "VGG":

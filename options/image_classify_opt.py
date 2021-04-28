@@ -10,6 +10,8 @@ class ImageClassifyOpt(BaseOpt):
     def add_model_args(parser):
         parser.add_argument('--model', type=str, default='ResNet', choices=CNN_MODELS,
                             help='chooses which model to use. ')
+        parser.add_argument('--again', action="store_true", help="training all paramters to increase acc and decrease "
+                                                                 "loss. (need big enough cuda memory)")
         BaseOpt.add_model_args(parser)
 
     @staticmethod
