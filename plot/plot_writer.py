@@ -54,7 +54,7 @@ class PlotImageClassifier:
     def write_information(self):
         if self.plot:
             information = json.dumps(vars(self.opt))
-            self.writer.add_text("My-PyDNN", information, 0)
+            self.writer.add_text("My-PyDNN", information)
 
     def write_pr_curve(self, labels, predicts):
         if self.plot:
