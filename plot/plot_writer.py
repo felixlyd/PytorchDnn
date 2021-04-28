@@ -1,5 +1,6 @@
 import os
 import json
+import time
 
 import torch
 from tensorboardX import SummaryWriter
@@ -16,7 +17,7 @@ class PlotImageClassifier:
         self.msg = 'Iter: {0:>6},  Train Loss: {1:>5.2},  Train Acc: {2:>6.2%},  Val Loss: {3:>5.2},  Val Acc: {' \
                    '4:>6.2%},  Time: {5}'
         if self.plot:
-            self.writer = SummaryWriter(log_dir=os.path.join(self.log, "ImageClassifer_"+self.model_name))
+            self.writer = SummaryWriter(log_dir=os.path.join(self.log, self.model_name+"_"+time.strftime('%m-%d_%H.%M', time.localtime())))
         else:
             self.writer = None
 
@@ -61,4 +62,4 @@ class PlotImageClassifier:
             self.writer.add_pr_curve ("pr_curve", labels, predicts, 0)
 
     def write_lr(self, lr, iter):
-        self.writer.add_scalar("learning_rate", lr, iter)
+        self.writer.add_scalar("train/learning_rate", lr, iter)
