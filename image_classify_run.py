@@ -37,6 +37,8 @@ if __name__ == '__main__':
         stop = False
         saved = ModelSave(opt)
         plot = PlotImageClassifier(opt)
+        plot.write_information()
+        plot.write_model(model.model, model.input_size, data.device)
         optimizer = Optimizer(opt, model.model.parameters())
         for epoch in range(opt.epoch_num):
             print('Epoch [{}/{}]'.format(epoch + 1, opt.epoch_num))
@@ -53,9 +55,10 @@ if __name__ == '__main__':
                     valid_acc, valid_loss = get_valid_acc_loss(model.model, data.inputs[VALID], criterion, data.device)
                     model.model.train()
                     saved.save_model_state(valid_loss, model.model, total_iter)
-                    plot.writing(train_loss.item(), valid_loss, train_acc, valid_acc, total_iter)
+                    plot.write_loss_acc(train_loss.item(), valid_loss, train_acc, valid_acc, total_iter)
                     plot.print_msg(train_loss.item(), valid_loss, train_acc, valid_acc, total_iter,
                                    get_time_dif(start_time))
+                    plot.write_lr(optimizer.get_iter_lr(),total_iter)
                 total_iter = total_iter + 1
                 stop = saved.is_shut_down(total_iter)
                 if stop:
@@ -63,6 +66,6 @@ if __name__ == '__main__':
             optimizer.lr_decay()
             if stop:
                 break
-        plot.write_down()
+        plot.write_done()
         saved.save_model(model.model)
         print("Time usage:", get_time_dif(start_time))

@@ -36,3 +36,6 @@ class Optimizer:
     def lr_decay(self):
         if self._lr_scheduler is not None:
             self._lr_scheduler.step()
+
+    def get_iter_lr(self):
+        return self._optimizer.param_groups[0]['lr']
