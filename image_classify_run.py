@@ -17,15 +17,13 @@ def transfer_train(opt_, data_, model_, optimizer_, criterion_, saved_, plot_):
         print('Epoch [{}/{}]'.format(epoch + 1, opt_.epoch_num))
         for i, (inputs, labels) in enumerate(data_.inputs[TRAIN]):
             optimizer_.zero_()
-            inputs = inputs.to(data.device)
-            labels = labels.to(data.device)
             outputs = model_.model(inputs)
             train_loss = criterion_.compute_(outputs, labels)
             criterion_.backward()
             optimizer_.update_()
-            if model_.total_iter % 100 == 0:
+            if model_.total_iter % opt_.plot_freq == 0:
                 train_acc = get_train_acc(outputs, labels)
-                valid_acc, valid_loss = get_valid_acc_loss(model_.model, data_.inputs[VALID], criterion_, data_.device)
+                valid_acc, valid_loss = get_valid_acc_loss(model_.model, data_.inputs[VALID], criterion_)
                 model_.model.train()
                 saved_.save_model_state(valid_loss, model_.model, model_.total_iter)
                 plot_.write_loss_acc(train_loss.item(), valid_loss, train_acc, valid_acc, model_.total_iter)
@@ -55,8 +53,7 @@ if __name__ == '__main__':
     if not is_train:
         start_time = time.time()
         print("Testing data...")
-        test_acc, test_loss = get_test_acc_loss(model.model, data.inputs[TEST], criterion, data.device,
-                                                out_path=opt.out)
+        test_acc, test_loss = get_test_acc_loss(model.model, data.inputs[TEST], criterion, out_path=opt.out)
         msg = 'Test Loss: {0:>5.2},  Test Acc: {1:>6.2%}'
         print(msg.format(test_loss, test_acc))
         print("Time usage:", get_time_dif(start_time))
@@ -73,7 +70,7 @@ if __name__ == '__main__':
         # 再继续学习所有参数
         if opt.again:
             model._set_params_requires_grad(use_pre=False)
-            opt.epoch_num=10
+            opt.epoch_num=opt.epoch_num // 2
             print("Transfer Training data again...")
             print("Set all params requiring grad...")
             start_time = time.time()

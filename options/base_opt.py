@@ -65,6 +65,7 @@ class BaseOpt:
         parser.add_argument('--thread_num', type=int, default=4, help="threads for loading data.")
         parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU.')
         parser.add_argument('--plot', action="store_true", help='if specified, plot the logs powered by tensorboard.')
+        parser.add_argument('--plot_freq', type=int, default=50, help='every X iters to record loss and acc. ')
         parser.add_argument('--seed', type=int, default=24, help="random seed.")
         parser.add_argument('--help', action="store_true", help="show this help message and exit.")
 

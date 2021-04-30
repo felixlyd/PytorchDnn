@@ -47,6 +47,33 @@ def this2image(tensor):
     return image
 
 
+class DataIter:
+    def __init__(self, dataloader, device):
+        self.dataloader = [(x, y) for x, y in tqdm(dataloader)]
+        self.index = 0
+        self.len = len(self.dataloader)
+        self.device = device
+
+    def _to_tensor(self, x, y):
+        return x.to(self.device), y.to(self.device)
+
+    def __next__(self):
+        if self.index >= self.len:
+            self.index = 0
+            raise StopIteration
+        else:
+            x, y = self.dataloader[self.index]
+            self.index = self.index + 1
+            x, y  = self._to_tensor(x, y)
+            return x, y
+
+    def __iter__(self):
+        return self
+
+    def __len__(self):
+        return self.len
+
+
 class ImageLoader():
     def __init__(self, opt):
         self.data_dir = opt.data
@@ -93,17 +120,16 @@ class ImageLoader():
             print("Missing {} folders".format(TEST))
             exit(-1)
         test_sets = datasets.ImageFolder(test_data_dir, get_transforms(False, input_size))
-        self.test_loaded = DataLoader(test_sets, batch_size=self.batch_size, shuffle=True,
-                                      num_workers=self.thread)
+        self.test_loaded = DataLoader(test_sets, batch_size=self.batch_size, num_workers=self.thread)
 
     def init_(self, input_size=224):
         if self.is_train:
             self._load_train_valid(input_size)
-            self.inputs[TRAIN] = [(x, y) for x, y in tqdm(self.train_loaded)]
-            self.inputs[VALID] = [(x, y) for x, y in tqdm(self.valid_loaded)]
+            self.inputs[TRAIN] = DataIter(self.train_loaded, self.device)
+            self.inputs[VALID] = DataIter(self.valid_loaded, self.device)
         else:
             self._load_test(input_size)
-            self.inputs[TEST] = [(x, y) for x, y in tqdm(self.test_loaded)]
+            self.inputs[TEST] = DataIter(self.test_loaded, self.device)
 
     def _set_device(self):
         device = "cpu"

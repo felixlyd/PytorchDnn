@@ -2,6 +2,10 @@ import torch
 from torchvision import models
 import torch.nn as nn
 
+'''
+这里的迁移学习主要参考官方文档：https://pytorch.org/vision/stable/models.html
+要注意模型的输入size对应，之后将模型的全连接层按自己所需修改
+'''
 
 class PreCNNModel:
     def __init__(self, opt):
