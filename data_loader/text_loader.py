@@ -11,12 +11,12 @@ from data_loader.base_loader import BaseLoader
 
 
 class TextDataset(Dataset):
-    def __init__(self, text_path, token, vocab_dict, pad_size=32):
+    def __init__(self, text_path, token, vocab_dict, seq_len=32):
         super(TextDataset, self).__init__()
         self.text_path = text_path
         self.token = token
         self.vocab_dict = vocab_dict
-        self.pad_size = pad_size
+        self.seq_len = seq_len
         self.inputs, self.labels = self._load_dataset()
         self.classes = torch.unique(self.labels)
 
@@ -39,11 +39,11 @@ class TextDataset(Dataset):
         return inputs, labels
 
     def _add_pad(self, words):
-        if self.pad_size:
-            if len(words) < self.pad_size:
-                words.extend([PAD] * (self.pad_size - len(words)))
+        if self.seq_len:
+            if len(words) < self.seq_len:
+                words.extend([PAD] * (self.seq_len - len(words)))
             else:
-                words = words[:self.pad_size]
+                words = words[:self.seq_len]
         return words
 
     def _to_vocab(self, words):
@@ -65,7 +65,8 @@ class TextLoader(BaseLoader):
         self.use_word = opt.word
         self.vocab = opt.vocab if opt.vocab is not None and os.path.exists(opt.vocab) else None
         self.vocab_dict = self._build_vocab()
-        self.pad_size = opt.pad_size
+        self.seq_len = opt.seq_len
+        self.vocab_size = len(self.vocab_dict)
 
     def tokenizer(self, words):
         if self.use_word:
@@ -109,5 +110,5 @@ class TextLoader(BaseLoader):
         if not os.path.exists(data_path):
             print("Missing {} texts. ".format(tag))
             exit(-1)
-        data_sets = TextDataset(data_path, self.tokenizer, self.vocab_dict, pad_size=self.pad_size)
+        data_sets = TextDataset(data_path, self.tokenizer, self.vocab_dict, seq_len=self.seq_len)
         return data_sets

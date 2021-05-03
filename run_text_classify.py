@@ -22,7 +22,7 @@ if __name__ == '__main__':
     data = TextLoader(opt)
     data.load()
     print("Time usage:", get_time_dif(start_time))
-    model.build(data.class_nums)
+    model.build(data.class_nums, data.vocab_size)
     criterion = LossFunc(opt)
 
     if not is_train:
@@ -33,7 +33,9 @@ if __name__ == '__main__':
         saved = ModelSave(opt)
         plot = TextClassifierPlot(opt)
         plot.write_information()
+        plot.write_model(model.model, data.device, data.vocab_size, data.seq_len)
         optimizer = Optimizer(opt, model.model.parameters())
+        # print(model.model)
         train(opt, data, model, optimizer, criterion, saved, plot)
         plot.write_done()
         saved.save_model(model.model)

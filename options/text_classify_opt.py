@@ -12,7 +12,7 @@ class TextClassifyOpt(BaseOpt):
                             help='choose which model to use. ')
         parser.add_argument('--embedding', type=str, default='Sogou', choices=EMBEDDINGS,
                             help="choose embeddings.")
-        parser.add_argument('--pad_size', type=int, default=32, help="padding size.")
+        parser.add_argument('--seq_len', type=int, default=32, help="fixed sentence length.")
         parser.add_argument('--word', default=False, type=bool, help='True for word, False for char')
         BaseOpt.add_model_args(parser)
 
