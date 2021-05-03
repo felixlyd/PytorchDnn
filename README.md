@@ -156,5 +156,13 @@ TensorBoard 2.4.1 at http://localhost:6006/ (Press CTRL+C to quit)
 ```
 **like this**
 
-![img1](./resources/images/1.png)
-![img2](./resources/images/2.png)
+![img3](./resources/images/3.png)
+
+| TextCNN | TextRNN                                                                                                                                                                     |
+|--------------------|------------
+|![img4](./resources/images/4.png)|![img5](./resources/images/5.png)
+
+## PS
+
+想了想还是不浪费计算机资源调整参数了，这个主要还是学习为主的demo小项目。下一步准备试试范闲写诗了。
+
