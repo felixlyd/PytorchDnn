@@ -61,16 +61,17 @@ class BaseLoader:
         self.is_train = (opt.test is False)
 
     def _load_sets(self, tag=TRAIN, **kwargs):
+        print("Loading datasets...")
         data_sets = BaseDataset()
         return data_sets
 
     def _load_train_valid(self, **kwargs):
+        print("Loading datasets...")
         train_sets = self._load_sets(tag=TRAIN, **kwargs)
         self.train_loaded = DataLoader(train_sets, batch_size=self.batch_size, shuffle=True,
                                        num_workers=self.thread)
         valid_sets = self._load_sets(tag=VALID, **kwargs)
-        self.valid_loaded = DataLoader(valid_sets, batch_size=self.batch_size, shuffle=True,
-                                       num_workers=self.thread)
+        self.valid_loaded = DataLoader(valid_sets, batch_size=self.batch_size, shuffle=True)
         self.class_nums = len(train_sets.classes)
         print("Train sets:", len(train_sets))
         print("Valid sets:", len(valid_sets))
@@ -81,13 +82,15 @@ class BaseLoader:
         test_sets = self._load_sets(tag=TEST, **kwargs)
         self.test_loaded = DataLoader(test_sets, batch_size=self.batch_size, num_workers=self.thread)
 
-    def init_(self, **kwargs):
+    def load(self, **kwargs):
         if self.is_train:
             self._load_train_valid(**kwargs)
+            print("Handling datasets...")
             self.inputs[TRAIN] = DataIter(self.train_loaded, self.device)
             self.inputs[VALID] = DataIter(self.valid_loaded, self.device)
         else:
             self._load_test(**kwargs)
+            print("Handling datasets...")
             self.inputs[TEST] = DataIter(self.test_loaded, self.device)
 
     def _set_device(self):

@@ -66,5 +66,5 @@ class ImageLoader(BaseLoader):
             data_sets = datasets.ImageFolder(data_dir, data_transforms)
             return data_sets
 
-    def init_(self, input_size=224):
-        BaseLoader.init_(self, input_size=input_size)
+    def load(self, input_size=224):
+        BaseLoader.load(self, input_size=input_size)
