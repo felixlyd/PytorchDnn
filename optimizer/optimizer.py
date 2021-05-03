@@ -24,7 +24,7 @@ class Optimizer:
         if self._lr_scheduler_name is None:
             self._lr_scheduler = None
         elif self._lr_scheduler_name == "StepLR":
-            self._lr_scheduler = optim.lr_scheduler.StepLR(self._optimizer, step_size=7, gamma=self.gamma)
+            self._lr_scheduler = optim.lr_scheduler.StepLR(self._optimizer, step_size=5, gamma=self.gamma)
         # elif self._lr_scheduler_name == "MultiStepLR":
         #     pass
         elif self._lr_scheduler_name == "ExponentialLR":
