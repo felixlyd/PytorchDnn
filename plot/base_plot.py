@@ -59,5 +59,5 @@ class BasePlot:
         if self.plot:
             self.writer.add_pr_curve("pr_curve", labels, predicts, 0)
 
-    def write_lr(self, lr, iter):
-        self.writer.add_scalar("train/learning_rate", lr, iter)
+    def write_lr(self, lr, iter_):
+        self.writer.add_scalar("train/learning_rate", lr, iter_)

@@ -1,6 +1,6 @@
 import argparse
 
-from common import APP_DESCRIPTION, TRAIN, TEST, OPTIMIZERS, LOSS_FUNCTIONS, LR_SCHEDULERS
+from common import APP_DESCRIPTION, OPTIMIZERS, LOSS_FUNCTIONS, LR_SCHEDULERS
 
 
 class BaseOpt:
@@ -55,7 +55,8 @@ class BaseOpt:
         parser.add_argument('--learning_rate', type=float, default=0.001, help="initial learning rate.")
         parser.add_argument('--beta1', type=float, default=0.9, help="possible parameters named by beta1.")
         parser.add_argument('--beta2', type=float, default=0.999, help="possible parameters named by beta1.")
-        parser.add_argument('--lr_scheduler', type=str, choices=LR_SCHEDULERS, help="chooses which lr_scheduler to use.")
+        parser.add_argument('--lr_scheduler', type=str, choices=LR_SCHEDULERS,
+                            help="chooses which lr_scheduler to use.")
         parser.add_argument('--gamma', type=float, default=0.1, help="gamma parameter of lr_scheduler.")
 
     @staticmethod
@@ -65,7 +66,7 @@ class BaseOpt:
         parser.add_argument('--thread_num', type=int, default=4, help="threads for loading data.")
         parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU.')
         parser.add_argument('--plot', action="store_true", help='if specified, plot the logs powered by tensorboard.')
-        parser.add_argument('--plot_freq', type=int, default=100, help='every X iters to record loss and acc. ')
+        parser.add_argument('--plot_freq', type=int, default=100, help='every X iter to record loss and acc. ')
         parser.add_argument('--seed', type=int, default=24, help="random seed.")
         parser.add_argument('--help', action="store_true", help="show this help message and exit.")
 
@@ -94,6 +95,5 @@ class BaseOpt:
 
     def _set_gpu(self):
         gpu_ids = self.args.gpu_ids.split(',')
-        gpu_ids = [ int(gpu_id) for gpu_id in gpu_ids]
+        gpu_ids = [int(gpu_id) for gpu_id in gpu_ids]
         return gpu_ids
-

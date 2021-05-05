@@ -18,7 +18,7 @@ class Optimizer:
     def _init_optimizer(self, params):
         # todo
         if self._optimizer_name == "Adam":
-            self._optimizer = optim.Adam(params, lr=self._lr, betas=(self.beta1,self.beta2))
+            self._optimizer = optim.Adam(params, lr=self._lr, betas=(self.beta1, self.beta2))
 
     def _init_lr_scheduler(self):
         if self._lr_scheduler_name is None:
